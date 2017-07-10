@@ -19,4 +19,4 @@ Open Application
     sleep    5s
 
 phantomjs
-    Open Browser    www.facetime.com    MainBrowser \ \     http://localhost:4444
+    Open Browser    www.facetime.com    MainBrowser \ \

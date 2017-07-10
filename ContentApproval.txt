@@ -1,0 +1,530 @@
+*** Settings ***
+Library           Selenium2Library
+Library           DateTime
+Library           DatabaseLibrary
+Library           Content_posting_TimeFunction.py
+Resource          Varibles.txt
+Resource          Xpaths.txt
+Library           String
+Library           WriteResultstoExcel.py
+
+*** Test Cases ***
+ENGCA001
+    [Documentation]    Verify that Content Post Approval Email is sent to Engager when publisher Add content and auto posts to LN network.
+    ...
+    ...    Login to Engage>>Go to publisher tab>>Click on Publish Content>>Post a Content>>Login into Mailserver>Open the mail and click 'OK'>>Check the Posting time>>Verfiy in DataBase if the post is approved and posted to network.
+    [Template]
+    Set Test Variable    ${TestID}    ENGCA001
+    LoginEngage
+    ${time}    ${PostingTime}    Publish
+    LoginMailServer_Click'OK'
+    ${Mailtime} =    Get Current Date    result_format=%B %d, %Y
+    Select Window    Welcome to Socialite!
+    Element Text Should Be    ${MailTextTobeverified}    This content will be posted at ${Mailtime} ${PostingTime[0]}:${PostingTime[1]} ${PostingTime[2]} IST
+    DatabaseConnection
+    Sleep    180s
+    Log To Console    ${time}
+    ${ContentID}=    Query    select contentID from SocnetContent sc \ inner join SocnetContentTextAssociation scta on sc.msgID=scta.msgID inner join MessageTextOptions mto on scta.textID=mto.textID where mto.text='${time}' and mto.csUserID=31
+    Log To Console    ${ContentID[0][0]}
+    Sleep    180s
+    ${ApprovedFromMailscheduleStatus }=    Query    select isApproved,scheduleStatus from EmailContentApproval where contentID=${ContentID[0][0]}
+    Log To Console    ${ApprovedFromMailscheduleStatus }
+    Log To Console    ${ApprovedFromMailscheduleStatus[0][0]}
+    Log To Console    ${ApprovedFromMailscheduleStatus[0][1]}
+    Run Keyword If    ${ApprovedFromMailscheduleStatus[0][0]}==1    Log To Console    Approved from Mail
+    ...    ELSE    Log To Console    Mail not Approved
+    Run Keyword If    ${ApprovedFromMailscheduleStatus[0][1]}==1    Check If Exists In Database    select * from SocnetContentSharingHistory where contentID=${ContentID[0][0]} and networkID=25
+    ...    ELSE    Log To Console    Not Posted to network
+    Log To Console    Approved and Posted to Network
+    Disconnect From Database
+    Results    ${1}    ${TestID}    ${Result_Status_Pass}
+    [Teardown]    Run Keywords    Close All Browsers
+    ...    AND    Run Keyword If Test Failed    Results    ${1}    ${TestID}    ${Result_Status_Fail}
+
+ENGCA002
+    [Documentation]    Verify that Content Post Approval Email must be sent when Engager auto posts content to LN from Subscriptions tab.
+    ...
+    ...    Engage Subscriptions Tab >>Add To Content Library>>Post a Content>>Login into Mailserver>Open the mail and click 'OK'>>Verfiy in DataBase if the post is approved and posted to network.
+    Set Test Variable    ${TestID}    ENGCA002
+    DeleteAllMails
+    Close Browser
+    LoginEngage
+    Click Element    ${SubscriptionsTab}
+    sleep    10s
+    Click Link    ${Add To Content Library}
+    sleep    10s
+    ${time}    ${PostingTime}    PublishfromEngage
+    LoginMailServer_Click'OK'
+    ${Mailtime} =    Get Current Date    result_format=%B %d, %Y
+    Select Window    Welcome to Socialite!
+    Element Text Should Be    ${MailTextTobeverified}    This content will be posted at ${Mailtime} ${PostingTime[0]}:${PostingTime[1]} ${PostingTime[2]} IST
+    DatabaseConnection
+    Sleep    180s
+    Log To Console    ${time}
+    ${ContentID}=    Query    select contentID from SocnetContent sc \ inner join SocnetContentTextAssociation scta on sc.msgID=scta.msgID inner join MessageTextOptions mto on scta.textID=mto.textID where mto.text='${time}' and mto.csUserID=31
+    Log To Console    ${ContentID[0][0]}
+    Sleep    150s
+    ${ApprovedFromMailscheduleStatus }=    Query    select isApproved,scheduleStatus from EmailContentApproval where contentID=${ContentID[0][0]}
+    Log To Console    ${ApprovedFromMailscheduleStatus }
+    Log To Console    ${ApprovedFromMailscheduleStatus[0][0]}
+    Log To Console    ${ApprovedFromMailscheduleStatus[0][1]}
+    Run Keyword If    ${ApprovedFromMailscheduleStatus[0][1]}==1    Check If Exists In Database    select * from SocnetContentSharingHistory where contentID=${ContentID[0][0]} and networkID=25
+    ...    ELSE    Log To Console    Approved but not Posted to network plz check
+    Run Keyword If    ${ApprovedFromMailscheduleStatus[0][0]}==1    Log To Console    Approved from mail and Posted to network
+    ...    ELSE    Log To Console    Not woking Plz check
+    Disconnect From Database
+    Results    ${2}    ${TestID}    ${Result_Status_Pass}
+    [Teardown]    Run Keywords    Close All Browsers
+    ...    AND    Run Keyword If Test Failed    Results    ${2}    ${TestID}    ${Result_Status_Fail}
+
+ENGCA003
+    [Documentation]    Verify that Content Post Approval Email is sent to Engager when publisher adds a content which is available till the time mentioned under "Content Available \ Until" and auto posts to LN network.(Click On ok after Content Available Until time)So this will not post to network
+    [Template]
+    Set Test Variable    ${TestID}    ENGCA003
+    DeleteAllMails
+    Close Browser
+    LoginEngage
+    sleep    30s
+    Click Element    ${PublishTab}
+    sleep    20s
+    Click Element    ${PublishContent}
+    sleep    20s
+    ${time} =    Get Current Date    result_format=%Y-%m-%d%H-%M
+    Log To Console    ${time}
+    Click Element    ${TextOption}
+    Input Text    ${TextOption}    ${time}
+    Sleep    10s
+    Click Element    ${Category}
+    Sleep    10s
+    Click Element    ${SelectCategory}
+    Sleep    20s
+    Click Element    ${WhenToAdd_later}
+    sleep    10s
+    Click Element    ${ContentAvailableStartingDate}
+    ${date}=    Get Current Date    result_format=%m/%d/%Y
+    ${PostingTime}=    Content_posting_Time    ${5}
+    Input Text    ${ContentAvailableStartingDate}    ${date}
+    Press Key    ${ContentAvailableStartingDate}    \\13
+    sleep    10s
+    Click Element    ${ContentAvailableStartingHour}
+    Input Text    ${ContentAvailableStartingHour}    ${PostingTime[0]}
+    sleep    10s
+    Click Element    ${ContentAvailableStartingMin}
+    Input Text    ${ContentAvailableStartingMin}    ${PostingTime[1]}
+    sleep    10s
+    Click Element    ${ContentAvailableStartingAMPM}
+    Input Text    ${ContentAvailableStartingAMPM}    ${PostingTime[2]}
+    sleep    2s
+    Click Element    ${ContentAvailableUntilDate}
+    Input Text    ${ContentAvailableUntilDate}    ${date}
+    Press Key    ${ContentAvailableUntilDate}    \\13
+    ${PostingTime}=    Content_posting_Time    ${7}
+    sleep    10s
+    Click Element    ${ContentAvailableUntilHour}
+    Input Text    ${ContentAvailableUntilHour}    ${PostingTime[0]}
+    sleep    3s
+    Click Element    ${ContentAvailableUntilMin}
+    Input Text    ${ContentAvailableUntilMin}    ${PostingTime[1]}
+    sleep    3s
+    Click Element    ${ContentAvailableUntilAMPM}
+    Input Text    ${ContentAvailableUntilAMPM}    ${PostingTime[2]}
+    sleep    30s
+    Click Element    ${SliderArrowRight}
+    Sleep    10s
+    Click Element    ${PostingContentWillStart_hr}
+    Input Text    ${PostingContentWillStart_hr}    ${PostingTime[0]}
+    Sleep    10s
+    Click Element    ${PostingContentWillStart_min}
+    Input Text    ${PostingContentWillStart_min}    ${PostingTime[1]}
+    Sleep    10s
+    Click Element    ${PostingContentWillStartAMPM}
+    Input Text    ${PostingContentWillStartAMPM}    ${PostingTime[2]}
+    Sleep    10s
+    Click Element    ${PostingContentWillStart}
+    Input Text    ${PostingContentWillStart}    01
+    Sleep    20s
+    Click Element    ${AddContent}
+    sleep    240s
+    LoginMailServer_Click'OK'
+    Select Window    Welcome to Socialite!
+    Element Text Should Be    ${MailTextTobeverified1}    Unable to post content as this content is expired.
+    DatabaseConnection
+    ${ContentID}=    Query    select contentID from SocnetContent sc inner join SocnetContentTextAssociation scta on sc.msgID=scta.msgID inner join MessageTextOptions mto on scta.textID=mto.textID where mto.text='${time}' and mto.csUserID=31
+    Log To Console    ${ContentID[0][0]}
+    Check If Not Exists In Database    select * from SocnetContentSharingHistory where contentID=${ContentID[0][0]} and networkID=25
+    Disconnect From Database
+    Results    ${3}    ${TestID}    ${Result_Status_Pass}
+    [Teardown]    Run Keywords    Close All Browsers
+    ...    AND    Run Keyword If Test Failed    Results    ${3}    ${TestID}    ${Result_Status_Fail}
+
+ENGCA004
+    [Documentation]    Verify that Content Post Approval Email is sent to Engager when publisher adds a content which is available till the time mentioned under "Content Available \ Until" and auto posts to LN network.(Click On ok before Content Available Until time)So this will post to network
+    [Setup]
+    Set Test Variable    ${TestID}    ENGCA004
+    DeleteAllMails
+    Close Browser
+    LoginEngage
+    sleep    30s
+    Click Element    ${PublishTab}
+    sleep    20s
+    Click Element    ${PublishContent}
+    sleep    20s
+    ${time} =    Get Current Date    result_format=%Y-%m-%d%H-%M
+    Log To Console    ${time}
+    Click Element    ${TextOption}
+    Input Text    ${TextOption}    ${time}
+    Sleep    10s
+    Click Element    ${Category}
+    Sleep    5s
+    Click Element    ${SelectCategory}
+    Sleep    20s
+    Click Element    ${WhenToAdd_later}
+    sleep    10s
+    Click Element    ${ContentAvailableStartingDate}
+    ${date}=    Get Current Date    result_format=%m/%d/%Y
+    ${PostingTime}=    Content_posting_Time    ${5}
+    Log To Console    This 5 min ${PostingTime}
+    Input Text    ${ContentAvailableStartingDate}    ${date}
+    Press Key    ${ContentAvailableStartingDate}    \\13
+    sleep    10s
+    Click Element    ${ContentAvailableStartingHour}
+    Input Text    ${ContentAvailableStartingHour}    ${PostingTime[0]}
+    sleep    10s
+    Click Element    ${ContentAvailableStartingMin}
+    Input Text    ${ContentAvailableStartingMin}    ${PostingTime[1]}
+    sleep    10s
+    Click Element    ${ContentAvailableStartingAMPM}
+    Input Text    ${ContentAvailableStartingAMPM}    ${PostingTime[2]}
+    sleep    2s
+    Click Element    ${ContentAvailableUntilDate}
+    Input Text    ${ContentAvailableUntilDate}    ${date}
+    Press Key    ${ContentAvailableUntilDate}    \\13
+    ${PostingTime}=    Content_posting_Time    ${7}
+    sleep    10s
+    Click Element    ${ContentAvailableUntilHour}
+    Input Text    ${ContentAvailableUntilHour}    ${PostingTime[0]}
+    sleep    3s
+    Click Element    ${ContentAvailableUntilMin}
+    Input Text    ${ContentAvailableUntilMin}    ${PostingTime[1]}
+    sleep    3s
+    Click Element    ${ContentAvailableUntilAMPM}
+    Input Text    ${ContentAvailableUntilAMPM}    ${PostingTime[2]}
+    sleep    30s
+    Click Element    ${SliderArrowRight}
+    Sleep    10s
+    Click Element    ${PostingContentWillStart_hr}
+    Input Text    ${PostingContentWillStart_hr}    ${PostingTime[0]}
+    Sleep    10s
+    Click Element    ${PostingContentWillStart_min}
+    Input Text    ${PostingContentWillStart_min}    ${PostingTime[1]}
+    Sleep    10s
+    Click Element    ${PostingContentWillStartAMPM}
+    Input Text    ${PostingContentWillStartAMPM}    ${PostingTime[2]}
+    Sleep    10s
+    Click Element    ${PostingContentWillStart}
+    Input Text    ${PostingContentWillStart}    01
+    Sleep    20s
+    Click Element    ${AddContent}
+    LoginMailServer_Click'OK'
+    ${Mailtime} =    Get Current Date    result_format=%B %d, %Y
+    Select Window    Welcome to Socialite!
+    Element Text Should Be    ${MailTextTobeverified}    This content will be posted at ${Mailtime} ${PostingTime[0]}:${PostingTime[1]} ${PostingTime[2]} IST
+    sleep    200s
+    DatabaseConnection
+    ${ContentID}=    Query    select contentID from SocnetContent sc inner join SocnetContentTextAssociation scta on sc.msgID=scta.msgID inner join MessageTextOptions mto on scta.textID=mto.textID where mto.text='${time}' and mto.csUserID=31
+    Log To Console    ${ContentID[0][0]}
+    Check If Exists In Database    select * from SocnetContentSharingHistory where contentID=${ContentID[0][0]} and networkID=25
+    Disconnect From Database
+    Results    ${4}    ${TestID}    ${Result_Status_Pass}
+    [Teardown]    Run Keywords    Close All Browsers
+    ...    AND    Run Keyword If Test Failed    Results    ${4}    ${TestID}    ${Result_Status_Fail}
+
+ENGCA005
+    [Documentation]    Verify that the content must not get posted to network when Engager clicks on 'Okay' button in Content Post Approval Email before Publisher deletes the content.
+    Set Test Variable    ${TestID}    ENGCA005
+    LoginEngage
+    ${time}    ${PostingTime}    Publish
+    Click Element    ${ContentLibrary}
+    sleep    10s
+    Click Element    ${ClickonAutomationcategory}
+    sleep    10s
+    Click Element    ${ClickonContentApprovalcategory}
+    Sleep    5s
+    DatabaseConnection
+    ${ContentID}=    Query    select contentID from SocnetContent sc inner join SocnetContentTextAssociation scta on sc.msgID=scta.msgID inner join MessageTextOptions mto on scta.textID=mto.textID where mto.text='${time}' and mto.csUserID=31
+    Log To Console    ${ContentID[0][0]}
+    Sleep    10s
+    Mouse Over    xpath=id('messageDelete${ContentID[0][0]}')/a/img
+    sleep    10s
+    Click Element    xpath=id('messageDelete${ContentID[0][0]}')/a/img
+    sleep    20s
+    Click Element    ${OKButtonforDelete}
+    sleep    5s
+    LoginMailServer_Click'OK'
+    Select Window    Welcome to Socialite!
+    Element Text Should Be    ${MailTextTobeverified1}    Unable to post content as this content is deleted.
+    Check If Not Exists In Database    select * from SocnetContentSharingHistory where contentID=${ContentID[0][0]} and networkID=25
+    Disconnect From Database
+    Results    ${5}    ${TestID}    ${Result_Status_Pass}
+    [Teardown]    Run Keywords    Close All Browsers
+    ...    AND    Run Keyword If Test Failed    Results    ${5}    ${TestID}    ${Result_Status_Fail}
+
+ENBCA006
+    [Documentation]    Verify that Content Post Approval Email must NOT be re-sent to Engager when Publisher updates the content after Engager clicks 'Okay' button.
+    ...
+    ...
+    ...    Validate for updated content in network
+    ...
+    ...
+    ...    Login into Engage>>Publisher>Publish a content>>Go to Mail and click on ok Before Shedule time >> After the post shedule time go to content libary>> Update the Post
+    ...
+    ...    check if Both the old and new Post should be present the network
+    Set Test Variable    ${TestID}    ENGCA006
+    LoginEngage
+    ${time}    ${PostingTime}    Publish
+    LoginMailServer_Click'OK'
+    DatabaseConnection
+    ${ContentID}=    Query    select contentID from SocnetContent sc \ inner join SocnetContentTextAssociation scta on sc.msgID=scta.msgID inner join MessageTextOptions mto on scta.textID=mto.textID where mto.text='${time}' and mto.csUserID=31
+    Log To Console    ${ContentID[0][0]}
+    Sleep    100s
+    Switch Browser    1
+    Click Element    ${ContentLibrary}
+    sleep    10s
+    Click Element    ${ClickonAutomationcategory}
+    sleep    10s
+    Click Element    ${ClickonContentApprovalcategory}
+    Sleep    5s
+    Click Image    xpath=id('sc_${ContentID[0][0]}')/div[1]/a/img
+    Sleep    5s
+    Click Image    ${RemoveOldTextOption}
+    Sleep    5s
+    Click Element    ${TextOption}
+    Input Text    ${TextOption}    reschedule post_ ${time}
+    sleep    5s
+    Click Element    ${Updatecontent}
+    sleep    200s
+    ${CountOfTextPostedToNetwork}=    Query    select count(*) from SocnetContentSharingHistory where contentID=${ContentID[0][0]} and networkID=25
+    Disconnect From Database
+    Run Keyword If    ${CountOfTextPostedToNetwork[0][0]}==2    Log To Console    Updated Content is Posted to network
+    ...    ELSE    Fail    The Updated content is not posted to network
+    Results    ${6}    ${TestID}    ${Result_Status_Pass}
+    [Teardown]    Run Keywords    Close All Browsers
+    ...    AND    Run Keyword If Test Failed    Results    ${6}    ${TestID}    ${Result_Status_Fail}
+
+ENBCA007
+    [Documentation]    Verify that on clicking 'Okay' button more than once , an appropriate message "This content has been already approved" must be displayed to the Engager.
+    Set Test Variable    ${TestID}    ENGCA007
+    DeleteAllMails
+    Close Browser
+    LoginEngage
+    ${time}    ${PostingTime}    Publish
+    sleep    20s
+    LoginMailServer_Click'OK'
+    Select Window    Welcome to Socialite!
+    ${text}=    Get Text    ${MailTextTobeverified}
+    ${Mailtext}=    Remove String    ${text}    This content will be posted at
+    Close Window
+    Select Window    Roundcube Webmail :: Please Approve: Socialite Scheduled Post on LinkedIn
+    Sleep    10s
+    Click Element    ${MailClickOK}
+    log    ${Mailtext}
+    Sleep    10s
+    Select Window    Welcome to Socialite!
+    Sleep    10s
+    Element Text Should Be    ${MailTextTobeverified2}    This content has been already approved.\nContent post time:${Mailtext}
+    sleep    10s
+    Results    ${7}    ${TestID}    ${Result_Status_Pass}
+    [Teardown]    Run Keywords    Close All Browsers
+    ...    AND    Run Keyword If Test Failed    Results    ${7}    ${TestID}    ${Result_Status_Fail}
+
+ENGCA008
+    [Documentation]    Verify that if Engager Removes Submission before user clicks OK button in Content Post Approval email , the content must not get posted to network.
+    ...
+    ...
+    ...    Do a Publish Content from Publisher with any Posting Content Will Start>>Go to Engage tab >>Pending update>> Remove the content >>Go to mail and click ok>check if ur getting "Unable to post content as this content is removed by you."
+    Set Test Variable    ${TestID}    ENGCA008
+    DeleteAllMails
+    Close Browser
+    LoginEngage
+    ${time}    ${PostingTime}    Publish
+    DatabaseConnection
+    ${ContentID}=    Query    select contentID from SocnetContent sc \ inner join SocnetContentTextAssociation scta on sc.msgID=scta.msgID inner join MessageTextOptions mto on scta.textID=mto.textID where mto.text='${time}' and mto.csUserID=31
+    Log To Console    ${ContentID[0][0]}
+    sleep    25s
+    ${scheduleID}=    Query    select scheduleID from SocnetContentShareSchedular where contentID=${ContentID[0][0]}
+    Log To Console    ${scheduleID[0][0]}
+    Click Element    ${EngageTab}
+    sleep    75s
+    Click Element    ${PendingUpdate}
+    sleep    25s
+    Click Element    xpath=id('content_-1_${scheduleID[0][0]}')/div[2]/div[4]/span[1]/a
+    sleep    15s
+    Click Element    ${RemovesubmissionOK}
+    sleep    10s
+    LoginMailServer_Click'OK'
+    Select Window    Welcome to Socialite!
+    Element Text Should Be    ${MailTextTobeverified2}    Unable to post content as this content is removed by you.
+    sleep    10s
+    Check If Not Exists In Database    select * from SocnetContentSharingHistory where contentID=${ContentID[0][0]} and networkID=25
+    Disconnect From Database
+    Results    ${8}    ${TestID}    ${Result_Status_Pass}
+    [Teardown]    Run Keywords    Close All Browsers
+    ...    AND    Run Keyword If Test Failed    Results    ${8}    ${TestID}    ${Result_Status_Fail}
+
+ENGCA009
+    [Documentation]    Verify that if Engager Re-schedules the content before user clicks OK button in Content Post Approval email , the content must get posted to network the new scheduled time.
+    ...
+    ...    Do a Publish Content from Publisher with any Posting Content Will Start>>Go to Engage tab >>Pending update>> Do a Re-schedule>>Go to mail and check if the posted time is same as reschedule time
+    Set Test Variable    ${TestID}    ENGCA009
+    DeleteAllMails
+    Close Browser
+    LoginEngage
+    ${time}    ${PostingTime}    Publish
+    DatabaseConnection
+    ${ContentID}=    Query    select contentID from SocnetContent sc \ inner join SocnetContentTextAssociation scta on sc.msgID=scta.msgID inner join MessageTextOptions mto on scta.textID=mto.textID where mto.text='${time}' and mto.csUserID=31
+    Log To Console    ${ContentID[0][0]}
+    sleep    25s    ${Reschedule_hr}
+    ${scheduleID}=    Query    select scheduleID from SocnetContentShareSchedular where contentID=${ContentID[0][0]}
+    Log To Console    ${scheduleID[0][0]}
+    Click Element    ${EngageTab}
+    sleep    75s
+    Click Element    ${PendingUpdate}
+    sleep    10s
+    Click Element    xpath=id('content_-1_${scheduleID[0][0]}')/div[2]/div[4]/span[2]/a
+    sleep    10s
+    ${RescheduleTime}=    Content_posting_Time    ${4}
+    Click Element    ${Reschedule_hr}
+    Input Text    ${Reschedule_hr}    ${RescheduleTime[0]}
+    sleep    5s
+    Click Element    ${Reschedule_min}
+    Input Text    ${Reschedule_min}    ${RescheduleTime[1]}
+    Click Element    ${RescheduleAMPM}
+    Input Text    ${RescheduleAMPM}    ${RescheduleTime[2]}
+    sleep    5s
+    Click Element    ${ReschedulePostContent}
+    LoginMailServer_Click'OK'
+    ${Mailtime} =    Get Current Date    result_format=%B %d, %Y
+    Select Window    Welcome to Socialite!
+    Element Text Should Be    ${MailTextTobeverified2}    This content has been already approved.\nContent post time: ${Mailtime} ${RescheduleTime[0]}:${RescheduleTime[1]} ${RescheduleTime[2]} IST
+    sleep    100s
+    Check If Exists In Database    select * from SocnetContentSharingHistory where contentID=${ContentID[0][0]} and networkID=25
+    Disconnect From Database
+    Results    ${9}    ${TestID}    ${Result_Status_Pass}
+    [Teardown]    Run Keywords    Close All Browsers
+    ...    AND    Run Keyword If Test Failed    Results    ${9}    ${TestID}    ${Result_Status_Fail}
+
+*** Keywords ***
+LoginEngage
+    Open Browser    ${SocialiteURL}    chrome
+    Maximize Browser Window
+    Click Element    ${Loginname}
+    Input Text    ${Loginname}    ${UserName}
+    Click Element    ${LoginPassword}
+    Input Text    ${LoginPassword}    ${Password}
+    sleep    10s
+    Click Button    ${LoginButton}
+    ${present}=    Run Keyword And Return Status    Element Should Be Visible    ${LoginContinue}
+    Run Keyword If    ${present}    Click Button    ${LoginContinue}
+
+Publish
+    sleep    30s
+    Click Element    ${PublishTab}
+    sleep    20s
+    Click Element    ${PublishContent}
+    sleep    20s
+    ${time} =    Get Time
+    Click Element    ${TextOption}
+    Input Text    ${TextOption}    ${time}
+    sleep    30s
+    Click Element    ${Category}
+    sleep    5s
+    Click Element    ${SelectCategory}
+    sleep    20s
+    Click Element    ${SliderArrowRight}
+    sleep    10s
+    ${PostingTime}=    Content_posting_Time    ${5}
+    Click Element    ${PostingContentWillStart_hr}
+    Input Text    ${PostingContentWillStart_hr}    ${PostingTime[0]}
+    sleep    5s
+    Click Element    ${PostingContentWillStart_min}
+    Input Text    ${PostingContentWillStart_min}    ${PostingTime[1]}
+    Sleep    10s
+    Click Element    ${PostingContentWillStartAMPM}
+    Input Text    ${PostingContentWillStartAMPM}    ${PostingTime[2]}
+    sleep    5s
+    Click Element    ${PostingContentWillStart}
+    Input Text    ${PostingContentWillStart}    01
+    sleep    10s
+    Click Element    ${AddContent}
+    sleep    10s
+    Click Element    xpath=/html/body/div[10]/div[11]/div/button
+    Sleep    10s
+    Return From Keyword    ${time}    ${PostingTime}
+
+PublishfromEngage
+    ${time} =    Get Time
+    Click Element    ${TextOption}
+    Input Text    ${TextOption}    ${time}
+    sleep    30s
+    Click Element    xpath=id('cateText')
+    sleep    10s
+    Click Element    xpath=id('categoryOptions')/li[5]/a
+    sleep    20s
+    Click Element    xpath=id('sliderArrowRight')
+    sleep    10s
+    ${PostingTime}=    Content_posting_Time    ${5}
+    Click Element    xpath=id('hours3')
+    Input Text    xpath=id('hours3')    ${PostingTime[0]}
+    sleep    5s
+    Click Element    xpath=id('mins3')
+    Input Text    xpath=id('mins3')    ${PostingTime[1]}
+    Sleep    10s
+    Click Element    xpath=id('ampm3')
+    Input Text    xpath=id('ampm3')    ${PostingTime[2]}
+    sleep    5s
+    Click Element    xpath=id('hours5')
+    Input Text    xpath=id('hours5')    01
+    sleep    10s
+    Click Element    xpath=id('submitAddContent')
+    sleep    10s
+    Return From Keyword    ${time}    ${PostingTime}
+
+LoginMailServer_Click'OK'
+    Open Browser    ${MailURL}    chrome
+    Maximize Browser Window
+    Click Element    ${MailUsername}
+    Input Text    ${MailUsername}    ContentApproval@socauto.local
+    Sleep    5s
+    Click Element    ${MailPassword}
+    Input Text    ${MailPassword}    facetime
+    Sleep    10s
+    Click Button    ${MailLogin}
+    Sleep    30s
+    Click Element    ${MailRefresh}
+    Sleep    60s
+    Click Element    ${MailRefresh}
+    Sleep    20s
+    Click Element    ${MailSubject}
+    Double Click Element    ${MailSubject}
+    Sleep    10s
+    Click Element    ${MailClickOK}
+
+DatabaseConnection
+    Connect To Database    MySQLdb    ${DBName}    ${DBUserName}    ${DBPassword}    ${DBHost}    ${DBPort}
+
+DeleteAllMails
+    Open Browser    ${MailURL}    chrome
+    Maximize Browser Window
+    Click Element    ${MailUsername}
+    Input Text    ${MailUsername}    ContentApproval@socauto.local
+    Sleep    5s
+    Click Element    ${MailPassword}
+    Input Text    ${MailPassword}    facetime
+    Sleep    10s
+    Click Button    ${MailLogin}
+    Click Element    ${MailSelectOption}
+    sleep    5s
+    Click Element    ${MailSelectAll}
+    sleep    20s
+    Click Element    ${MailDelete}
+    sleep    20s

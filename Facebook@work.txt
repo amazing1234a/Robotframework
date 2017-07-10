@@ -1,0 +1,159 @@
+*** Settings ***
+Library           Selenium2Library
+Library           DateTime
+
+*** Test Cases ***
+UploadFile
+    Open Chrome
+    Go To    https://actiance.facebook.com/work/landing/input
+    Maximize Browser Window
+    Click Element    xpath=//*[@name="email"]
+    sleep    5s
+    Input Text    xpath=//*[@name="email"]    AutoFB_at_Work@actiance.com
+    sleep    5s
+    Click Element    xpath=//button[contains(text(),'Continue')]
+    sleep    5s
+    Input Text    xpath=//input[@name="pass"]    facetime
+    Click Element    xpath= //button[contains(text(),'Log In')]
+    sleep    10s
+    Click Element    xpath=//div[contains(text(),'Python Selenium Automation')]
+    sleep    5s
+    Click Element    xpath= \ //span[contains(text(),'Files')]
+    sleep    10s
+    Click Element    xpath=//a[contains(text(),'Upload File')]
+    sleep    5s
+    Choose File    xpath=//input[@name="file1"]    C:/Users/ckumar/Desktop/i.jpg
+    sleep    20s
+    Click Element    xpath=//*[@name="message_text"]
+    ${timestamp}    Get Current Date    result_format=%Y-%m-%d%H-%M-%S
+    Input Text    xpath=//*[@name="message_text"]    File was uploaded at this time ${timestamp}
+    sleep    10s
+    Click Element    xpath=(//button[contains(text(),'Save')] )[2]
+    sleep    10s
+    [Teardown]    Close All Browsers
+
+UploadPhotos
+    Open Chrome
+    Go To    https://actiance.facebook.com/work/landing/input
+    Maximize Browser Window
+    Click Element    xpath=//*[@name="email"]
+    sleep    5s
+    Input Text    xpath=//*[@name="email"]    AutoFB_at_Work@actiance.com
+    sleep    5s
+    Click Element    xpath=//button[contains(text(),'Continue')]
+    sleep    5s
+    Input Text    xpath=//input[@name="pass"]    facetime
+    Click Element    xpath= //button[contains(text(),'Log In')]
+    sleep    10s
+    Click Element    xpath=//div[contains(text(),'Python Selenium Automation')]
+    sleep    5s
+    Click Element    xpath=(//span[contains(text(),'Photos')])[1]
+    sleep    5s
+    ${timestamp}    Get Current Date    result_format=%Y-%m-%d%H-%M-%S
+    sleep    20s
+    Choose File    xpath=//input[@title="Choose a file to upload"]    C:/Users/ckumar/Desktop/mojo.jpg
+    sleep    30s
+    Click Button    xpath=//button[@type='submit' and contains(., "Post")]
+    sleep    20s
+    [Teardown]    Close All Browsers
+
+new
+    Open Browser    https://actiance.facebook.com/work/landing/input    chrome
+    Maximize Browser Window
+    Click Element    xpath=//*[@name="email"]
+    sleep    5s
+    Input Text    xpath=//*[@name="email"]    AutoFB_at_Work@actiance.com
+    sleep    5s
+    Click Element    xpath=//button[contains(text(),'Continue')]
+    sleep    5s
+    Input Text    xpath=//input[@name="pass"]    facetime
+    Click Element    xpath= //button[contains(text(),'Log In')]
+    sleep    20s
+    [Teardown]    Close All Browsers
+
+sample 100 comm
+    Open Chrome
+    Go To    https://actiance.facebook.com/work/landing/input
+    Maximize Browser Window
+    Click Element    xpath=//*[@name="email"]
+    sleep    5s
+    Input Text    xpath=//*[@name="email"]    AutoFB_at_Work@actiance.com
+    sleep    5s
+    Click Element    xpath=//button[contains(text(),'Continue')]
+    sleep    5s
+    Input Text    xpath=//input[@name="pass"]    facetime
+    Click Element    xpath= //button[contains(text(),'Log In')]
+    sleep    10s
+    Click Element    xpath=//div[contains(text(),'New FB@Work Group')]
+    sleep    10s
+    Click Element    xpath=(//em[contains(text(),'Write a comment...')])[1]
+    sleep    10s
+    Input Text    xpath=//div[@class='_1mf _1mj']    haha
+    Press Key    xpath=//div[@class='_1mf _1mj']    \\13
+    Set Test Variable    ${NumberOftimes}    0
+    : FOR    ${NumberOftimes}    IN RANGE    115
+    \    Click Element    xpath=(//em[contains(text(),'Write a comment...')])[1]
+    \    Input Text    xpath=//div[@class='_1mf _1mj']    haha ${NumberOftimes}
+    \    Press Key    xpath=//div[@class='_1mf _1mj']    \\13
+    \    sleep    10s
+    \    log    ${NumberOftimes+1}
+    \    Exit For Loop If    ${NumberOftimes}==1000
+    \    log    exit
+    sleep    20s
+    ${TEST_STATUS}
+    [Teardown]    Close All Browsers
+
+sample 100 comm1
+    Open Chrome
+    Go To    https://actiance.facebook.com/work/landing/input
+    Maximize Browser Window
+    Click Element    xpath=//*[@name="email"]
+    sleep    5s
+    Input Text    xpath=//*[@name="email"]    AutoFB_at_Work@actiance.com
+    sleep    5s
+    Click Element    xpath=//button[contains(text(),'Continue')]
+    sleep    5s
+    Input Text    xpath=//input[@name="pass"]    facetime
+    Click Element    xpath= //button[contains(text(),'Log In')]
+    sleep    10s
+    Click Element    xpath=(//em[contains(text(),'Write a comment...')])[1]
+    sleep    10s
+    Press Key    xpath=//div[@class='_1mf _1mj']    pandi
+    Sleep    10s
+    Clear Element Text    xpath=id('composer_text_input_box')/div/div/div[2]/div/div/div/div
+    sleep    10s
+    Input Text    xpath=id('composer_text_input_box')/div/div/div[2]/div/div/div/div    haha
+    Sleep    10s
+    Press Key    xpath=//div[@id='composer_text_input_box']//span    \\13
+    Sleep    10s
+    [Teardown]    Close All Browsers
+
+aaaaa
+    Open Browser    https://actiance.facebook.com/work/landing/input    IE
+    sleep    10s
+    Click Element    xpath=//div[contains(text(),'New FB@Work Group')]
+    Set Test Variable    ${NumberOftimes}    7
+    : FOR    ${NumberOftimes}    IN RANGE    115
+    \    Click Element    xpath=(//em[contains(text(),'Write a comment...')])
+    \    sleep    5s
+    \    Press Key    xpath=//div[@class='_1mf _1mj']    this message is ${NumberOftimes}
+    \    Press Key    xpath=//div[@class='_1mf _1mj']    \\13
+    ${EMPTY}
+    \    sleep    10s
+    \    log    ${NumberOftimes+1}
+    \    Exit For Loop If    ${NumberOftimes}==115
+    \    log    exit
+    sleep    20s
+    [Teardown]    Close All Browsers
+
+*** Keywords ***
+Open Chrome
+    [Arguments]    ${alias}=${EMPTY}
+    ${options}=    Evaluate    sys.modules['selenium.webdriver'].ChromeOptions()    sys, selenium.webdriver
+    Call Method    ${options}    add_argument    disable-infobars    # to suppress "Chrome is being controlled by automated test software" info line
+    Call Method    ${options}    add_argument    disable-notifications
+    ${allow}=    Create Dictionary    setting=${1}
+    ${exceptions}=    Create Dictionary    actiance.facebook.com=${allow}
+    ${prefs}    Create Dictionary    credentials_enable_service=${false}
+    Call Method    ${options}    add_experimental_option    prefs    ${prefs}
+    Create WebDriver    Chrome    alias=${alias}    chrome_options=${options}

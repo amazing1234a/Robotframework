@@ -1,0 +1,12 @@
+*** Variables ***
+${SocialiteURL}    https://engageautomation1.socialite.net/socialite/login.action
+${UserName}       puser
+${Password}       facetime
+${MailURL}        http://192.168.120.250/
+${DBName}         engageautomation1
+${DBUserName}     root
+${DBPassword}     facetime
+${DBHost}         192.168.118.227
+${DBPort}         3306
+${Result_Status_Pass}    Pass
+${Result_Status_Fail}    Fail

@@ -1,0 +1,22 @@
+*** Settings ***
+Library           AppiumLibrary
+Library           Process
+Library           SSHLibrary
+Library           OperatingSystem
+Library           Selenium2Library
+
+*** Test Cases ***
+Open Application
+    Open Application    http://localhost:4723/wd/hub    platformName=Android    platformVersion=4.4.2    deviceName=emulator-5554    appPackage=com.whatsapp    appActivity=com.whatsapp.Main
+    sleep    10s
+    Click Element    xpath =//android.widget.TextView[@text='Chandan']
+    sleep    5s
+    Input Text    xpath =//android.widget.EditText[@text='Type a message']    hey Chandan
+    sleep    5s
+    Click Element    xpath =//android.widget.ImageButton[@content-desc='Send']
+    sleep    5s
+    Close Application
+    sleep    5s
+
+phantomjs
+    Open Browser    www.facetime.com    MainBrowser \ \     http://localhost:4444

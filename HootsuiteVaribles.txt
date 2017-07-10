@@ -1,0 +1,4 @@
+*** Variables ***
+${HootsuiteURL}    https://hootsuite.com/login
+${UserName}       srao_newcustomer1@yahoo.in
+${Password}       Facetime@1234

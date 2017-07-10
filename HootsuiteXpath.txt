@@ -1,0 +1,7 @@
+*** Variables ***
+${EmailID}        xpath=id('loginEmailInput')
+${PasswordField}    xpath=id('loginPasswordInput')
+${ClickOnMessageBox}    xpath=//*[contains(@class, 'messageBoxMessage')]
+${Save}           xpath=id('saveMessageButtons')/button[2]
+${SignIn}         xpath=(//button[contains(text(),'Sign in')] )[1]
+${ClickOnAnyPerson}    xpath=id('messageBoxForm')/div/div[1]/div/div/div[2]/div/div/div[1]/div[2]/strong

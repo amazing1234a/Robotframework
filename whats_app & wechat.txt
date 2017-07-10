@@ -1,0 +1,137 @@
+*** Settings ***
+Library           Selenium2Library
+Library           DateTime
+Library           subprocess
+Library           Operating System
+
+*** Test Cases ***
+WhatsApp
+    open chrome
+    Go To    https://web.whatsapp.com/
+    Maximize Browser Window
+    sleep    30s
+    Double Click Element    xpath=//*[contains(@title, 'Ssj')]
+    sleep    10s
+    sleep    10s
+    Set Test Variable    ${NumberOftimes}    1000
+    : FOR    ${NumberOftimes}    IN RANGE    1000
+    \    Click Element    xpath=id('main')/footer/div[1]/div[2]/div/div[2]
+    \    ${timestamp}    Get Current Date    result_format=%Y-%m-%d%H-%M-%S
+    \    Input Text    xpath=id('main')/footer/div[1]/div[2]/div/div[2]    The number of time i have sent this ${NumberOftimes} and u have not reply for all of this Check ur luckkkkkkk
+    \    Press Key    xpath=id('main')/footer/div[1]/div[2]/div/div[2]    \\13
+    ${EMPTY}
+    ${EMPTY}
+    ${EMPTY}
+    \    sleep    10s
+    \    log    ${NumberOftimes+1}
+    \    Exit For Loop If    ${NumberOftimes}==1000
+    \    log    exit
+    sleep    10s
+    log    out of loop
+    [Teardown]    Close All Browsers
+
+WeChat
+    [Setup]
+    Open Browser    https://web.wechat.com/    chrome
+    Maximize Browser Window
+    sleep    30s
+    Click Element    xpath=id('search_bar')/input
+    Input Text    xpath=id('search_bar')/input    Rijoy
+    sleep    10s
+    Press Key    xpath=id('search_bar')/input    \\13
+    sleep    10s
+    Set Test Variable    ${NumberOftimes}    1
+    : FOR    ${NumberOftimes}    IN RANGE    3
+    \    Click Element    xpath=id('editArea')
+    \    Input Text    xpath=id('editArea')    The number of time ${NumberOftimes} all of this
+    \    ${timestamp}    Get Current Date    result_format=%Y-%m-%d%H-%M-%S
+    \    sleep    5s
+    \    Click Element    xpath=id('chatArea')/div[3]/div[3]/a
+    \    sleep    10s
+    \    log    ${NumberOftimes+1}
+    \    Exit For Loop If    ${NumberOftimes}==3
+    \    log    exit
+    sleep    10s
+    log    out of loop
+    [Teardown]    Close All Browsers
+
+sample
+    Open Browser    https://web.wechat.com/    chrome
+    Maximize Browser Window
+    sleep    30s
+    Click Element    xpath=id('search_bar')/input
+    Input Text    xpath=id('search_bar')/input    Rijoy
+    sleep    10s
+    Press Key    xpath=id('search_bar')/input    \\13
+    sleep    10s
+    Click Element    xpath=id('editArea')
+    Input Text    xpath=id('editArea')    The number of time \ all of this
+    sleep    5s
+    Click Element    xpath=id('chatArea')/div[3]/div[3]/a
+    Click Element    xpath=id('editArea')
+    Input Text    xpath=id('editArea')    Hey
+    Press Key    xpath=id('chatArea')/div[3]/div[3]/a    \\13
+    sleep    20s
+    [Teardown]    Close All Browsers
+
+Smaple whatsapp exe
+    Open Browser    PhantomJS
+    Go To    https://web.whatsapp.com/
+    Dismiss Alert
+
+This is final
+    open chrome
+    Go To    https://web.whatsapp.com/
+    sleep    30s
+    Double Click Element    xpath=//*[contains(@title, 'Pandi')]
+    Click Element    xpath=id('main')/footer/div[1]/div[2]/div/div[2]
+    ${timestamp}    Get Current Date    result_format=%Y-%m-%d%H-%M-%S
+    Input Text    xpath=id('main')/footer/div[1]/div[2]/div/div[2]    not reply
+    Press Key    xpath=id('main')/footer/div[1]/div[2]/div/div[2]    \\13
+    sleep    20s
+
+qawws
+    open chrome
+    Go To    https://web.whatsapp.com/
+    ${cookies}=    Get Cookies
+    sleep    30s
+    Double Click Element    xpath=//*[contains(@title, 'Pandi')]
+    Click Element    xpath=id('main')/footer/div[1]/div[2]/div/div[2]
+    ${timestamp}    Get Current Date    result_format=%Y-%m-%d%H-%M-%S
+    Input Text    xpath=id('main')/footer/div[1]/div[2]/div/div[2]    not reply
+    Press Key    xpath=id('main')/footer/div[1]/div[2]/div/div[2]    \\13
+    sleep    20s
+
+whatsapp2
+    open chrome
+    Go To    https://web.whatsapp.com/
+    Maximize Browser Window
+    sleep    30s
+    Double Click Element    xpath=//*[contains(@title, 'Ssj')]
+    sleep    10s
+    sleep    10s
+    Set Test Variable    ${NumberOftimes}    1000
+    : FOR    ${NumberOftimes}    IN RANGE    1000
+    \    Click Element    xpath=id('main')/footer/div[1]/div[2]/div/div[2]
+    \    ${timestamp}    Get Current Date    result_format=%Y-%m-%d%H-%M-%S
+    \    Input Text    xpath=id('main')/footer/div[1]/div[2]/div/div[2]    I don't belive in luck :-)${NumberOftimes}
+    \    Press Key    xpath=id('main')/footer/div[1]/div[2]/div/div[2]    \\13
+    ${EMPTY}
+    ${EMPTY}
+    ${EMPTY}
+    \    sleep    10s
+    \    log    ${NumberOftimes+1}
+    \    Exit For Loop If    ${NumberOftimes}==1000
+    \    log    exit
+    sleep    10s
+    log    out of loop
+    Add Cookie
+    [Teardown]    Close All Browsers
+
+*** Keywords ***
+open chrome
+    [Arguments]    ${alias}=${EMPTY}
+    ${options}=    Evaluate    sys.modules['selenium.webdriver'].ChromeOptions()    sys, selenium.webdriver
+    Call Method    ${options}    add_argument    disable-infobars    # to suppress "Chrome is being controlled by automated test software" info line
+    Call Method    ${options}    add_argument    disable-application-cache
+    Create WebDriver    Chrome    alias=${alias}    chrome_options=${options}

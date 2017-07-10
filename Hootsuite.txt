@@ -1,0 +1,67 @@
+*** Settings ***
+Library           Selenium2Library
+Library           DateTime
+Library           RequestsLibrary
+Resource          HootsuiteXpath.txt
+Resource          HootsuiteVaribles.txt
+
+*** Test Cases ***
+LoginandPost
+    Open chrome
+    Go To    ${HootsuiteURL}
+    Maximize Browser Window
+    sleep    20s
+    Click Element    ${EmailID}
+    Input Text    ${EmailID}    ${UserName}
+    sleep    5s
+    Click Element    ${PasswordField}
+    sleep    5s
+    Input Password    ${PasswordField}    ${Password}
+    sleep    30s
+    sleep    10s
+    Click Element    ${SignIn}
+    ${present}=    Run Keyword And Return Status    Element Should Be Visible    xpath=//button[@type='button' and contains(., 'Not Now')]
+    Run Keyword If    ${present}    Click Button    xpath=//button[@type='button' and contains(., 'Not Now')]
+    sleep    35s
+    Click Element    ${ClickOnMessageBox}
+    ${timestamp}    Get Current Date    result_format=%Y-%m-%d%H-%M-%S
+    sleep    10s
+    Input Text    ${ClickOnMessageBox}    Check the time ${timestamp}
+    sleep    10s
+    Double Click Element    ${ClickOnAnyPerson}
+    sleep    10s
+    Click Element    ${ClickOnMessageBox}
+    Click Element    ${Save}
+    sleep    20s
+    [Teardown]    Close All Browsers
+
+sample
+    Open Browser    ${HootsuiteURL}    chrome
+    sleep    20s
+    Click Element    ${EmailID}
+    Input Text    ${EmailID}    ${UserName}
+    sleep    5s
+    Click Element    ${PasswordField}
+    sleep    5s
+    Input Password    ${PasswordField}    ${Password}
+    sleep    10s
+    Click Element    ${SignIn}
+    Dismiss Alert
+    sleep    35s
+    Click Element    ${ClickOnMessageBox}
+    ${timestamp}    Get Current Date    result_format=%Y-%m-%d%H-%M-%S
+    sleep    10s
+    Input Text    ${ClickOnMessageBox}    Check the time ${timestamp}
+    sleep    10s
+    Double Click Element    ${ClickOnAnyPerson}
+    sleep    10s
+    Click Element    ${ClickOnMessageBox}
+    Click Element    ${Save}
+    sleep    20s
+
+*** Keywords ***
+Open chrome
+    [Arguments]    ${alias}=${EMPTY}
+    ${options}=    Evaluate    sys.modules['selenium.webdriver'].ChromeOptions()    sys, selenium.webdriver
+    Call Method    ${options}    add_argument    disable-infobars    # to suppress "Chrome is being controlled by automated test software" info line
+    Create WebDriver    Chrome    alias=${alias}    chrome_options=${options}

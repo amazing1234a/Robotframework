@@ -1,0 +1,249 @@
+*** Settings ***
+Library           Selenium2Library
+Resource          varii.txt
+Library           DateTime
+Library           DatabaseLibrary
+Library           Pyfunctions.py
+
+*** Test Cases ***
+Login
+    Set Log Level    NONE
+    Open Browser    ${SocialiteURL}    chrome
+    Maximize Browser Window
+    Click Element    ${Loginname}
+    Input Text    ${Loginname}    ${UserName}
+    Click Element    ${LoginPassword}
+    Input Text    ${LoginPassword}    ${Password}
+    sleep    10s
+    Click Button    ${LoginButton}
+    ${present}=    Run Keyword And Return Status    Element Should Be Visible    ${LoginContinue}
+    Run Keyword If    ${present}    Click Button    ${LoginContinue}
+
+Publish
+    sleep    30s
+    Click Element    xpath=id('publisher')
+    sleep    20s
+    Click Element    xpath=id('addContentPopPublisher')
+    sleep    20s
+    ${time} =    Get Time
+    Click Element    xpath=id('options')
+    Input Text    xpath=id('options')    ${time}
+    sleep    30s
+    Click Element    xpath=id('cateText')
+    sleep    10s
+    Click Element    xpath=id('categoryOptions')/li[5]/a
+    sleep    20s
+    Click Element    xpath=id('sliderArrowRight')
+    sleep    10s
+    ${PostingTime}=    Content_posting_Time
+    Click Element    xpath=id('hours3')
+    Input Text    xpath=id('hours3')    ${PostingTime[0]}
+    Click Element    xpath=id('mins3')
+    Input Text    xpath=id('mins3')    ${PostingTime[1]}
+    Sleep    10s
+    Click Element    xpath=id('ampm3')
+    Input Text    xpath=id('ampm3')    ${PostingTime[2]}
+    Click Element    xpath=id('hours5')
+    Input Text    xpath=id('hours5')    01
+    sleep    10s
+    Click Element    xpath=id('submitAddContent')
+
+MailLogin
+    Open Browser    http://192.168.120.250/    chrome
+    Maximize Browser Window
+    Click Element    xpath=id('rcmloginuser')
+    Input Text    xpath=id('rcmloginuser')    ContentApproval@socauto.local
+    sleep    5s
+    Click Element    xpath=id('rcmloginpwd')
+    Input Text    xpath=id('rcmloginpwd')    facetime
+    sleep    10s
+    Click Button    xpath=id('login-form')/div[1]/form/p/input
+    sleep    30s
+
+Click
+    Click Element    xpath=id('rcmbtn106')
+    sleep    60s
+    Click Element    xpath=id('rcmbtn106')
+    sleep    20s
+    Click Element    xpath=//*[contains(text(),'Socialite Scheduled Post on LinkedIn')]
+    Double Click Element    xpath=//*[contains(text(),'Socialite Scheduled Post on LinkedIn')]
+    sleep    10s
+    Click Element    xpath=//*[contains(text(),'OK')]
+
+Click On OK
+    ${present}=    ${UserName}
+    Run Keyword If    ${present}==1231    Log To Console    asdasdasdasda212
+    ...    ELSE    Log To Console    HAHAHA
+
+DB
+    Connect To Database    MySQLdb    engageautomation1    root    facetime    192.168.119.71    3306
+    ${time} =    Get Current Date    result_format=%Y-%m-%d%H-%M
+    Log To Console    '${time}'
+    sleep    10s
+    ${ContentID}=    Query    select contentID from SocnetContent sc \ inner join SocnetContentTextAssociation scta on sc.msgID=scta.msgID inner join MessageTextOptions mto on scta.textID=mto.textID where mto.text='asdasd' and mto.csUserID=31
+    Log To Console    ${ContentID[0][0]}
+    ${ApprovedFromMailscheduleStatus }=    Query    select isApproved,scheduleStatus from EmailContentApproval where contentID=${ContentID[0][0]}
+    Log To Console    ${ApprovedFromMailscheduleStatus }
+    Log To Console    ${ApprovedFromMailscheduleStatus[0][0]}
+    Log To Console    ${ApprovedFromMailscheduleStatus[0][1]}
+    Run Keyword If    ${ApprovedFromMailscheduleStatus[0][0]}==1    Log To Console    Approved from mail
+    ...    ELSE    Log To Console    hahahahaha
+    Run Keyword If    ${ApprovedFromMailscheduleStatus[0][1]}==1    Check If Exists In Database    select * from SocnetContentSharingHistory where contentID=${ContentID[0][0]} and networkID=25    ELSE     Log To Console    Still in the Quee for posting
+    Disconnect From Database
+
+TestCase1
+    Open Browser    ${SocialiteURL}    chrome
+    Maximize Browser Window
+    Click Element    ${Loginname}
+    Input Text    ${Loginname}    ${UserName}
+    Click Element    ${LoginPassword}
+    Input Text    ${LoginPassword}    ${Password}
+    sleep    10s
+    Click Button    ${LoginButton}
+    ${present}=    Run Keyword And Return Status    Element Should Be Visible    ${LoginContinue}
+    Run Keyword If    ${present}    Click Button    ${LoginContinue}
+    sleep    30s
+    Click Element    xpath=id('publisher')
+    sleep    20s
+    Click Element    xpath=id('addContentPopPublisher')
+    sleep    20s
+    ${time} =    Get Current Date    result_format=%Y-%m-%d%H-%M
+    Log To Console    ${time}
+    Click Element    xpath=id('options')
+    Input Text    xpath=id('options')    ${time}
+    sleep    30s
+    Click Element    xpath=id('cateText')
+    sleep    5s
+    Click Element    xpath=id('categoryOptions')/li[5]/a
+    sleep    20s
+    Click Element    xpath=id('sliderArrowRight')
+    sleep    10s
+    ${PostingTime}=    Content_posting_Time
+    Click Element    xpath=id('hours3')
+    Input Text    xpath=id('hours3')    ${PostingTime[0]}
+    Click Element    xpath=id('mins3')
+    Input Text    xpath=id('mins3')    ${PostingTime[1]}
+    Sleep    10s
+    Click Element    xpath=id('ampm3')
+    Input Text    xpath=id('ampm3')    ${PostingTime[2]}
+    sleep    20s
+    Click Element    xpath=id('submitAddContent')
+    Open Browser    http://192.168.120.250/    chrome
+    Maximize Browser Window
+    Click Element    xpath=id('rcmloginuser')
+    Input Text    xpath=id('rcmloginuser')    ContentApproval@socauto.local
+    sleep    5s
+    Click Element    xpath=id('rcmloginpwd')
+    Input Text    xpath=id('rcmloginpwd')    facetime
+    sleep    10s
+    Click Button    xpath=id('login-form')/div[1]/form/p/input
+    sleep    30s
+    Click Element    xpath=id('rcmbtn106')
+    sleep    60s
+    Click Element    xpath=id('rcmbtn106')
+    sleep    20s
+    Click Element    xpath=//*[contains(text(),'Socialite Scheduled Post on LinkedIn')]
+    Double Click Element    xpath=//*[contains(text(),'Socialite Scheduled Post on LinkedIn')]
+    sleep    10s
+    Click Element    xpath=//*[contains(text(),'OK')]
+    Connect To Database    MySQLdb    engageautomation1    root    facetime    192.168.119.71    3306
+    sleep    10s
+    Log To Console    ${time}
+    ${TextID}=    Query    select textID from MessageTextOptions where text='${time}' and csUserID='31'
+    Log To Console    ${TextID[0][0]}
+    ${MsgID}=    Query    select msgID from SocnetContentTextAssociation where textID=${TextID[0][0]}
+    Log To Console    ${MsgID[0][0]}
+    ${ContentID}=    Query    select * from SocnetContent where msgID=${MsgID[0][0]} and categoryID=1656
+    Log To Console    ${ContentID[0][0]}
+    Disconnect From Database
+
+Publish-DB
+    Open Browser    ${SocialiteURL}    chrome
+    Maximize Browser Window
+    Click Element    ${Loginname}
+    Input Text    ${Loginname}    ${UserName}
+    Click Element    ${LoginPassword}
+    Input Text    ${LoginPassword}    ${Password}
+    sleep    10s
+    Click Button    ${LoginButton}
+    ${present}=    Run Keyword And Return Status    Element Should Be Visible    ${LoginContinue}
+    Run Keyword If    ${present}    Click Button    ${LoginContinue}
+    sleep    30s
+    Click Element    xpath=id('publisher')
+    sleep    20s
+    Click Element    xpath=id('addContentPopPublisher')
+    sleep    20s
+    ${time} =    Get Current Date    result_format=%Y-%m-%d%H-%M
+    Log To Console    ${time}
+    Click Element    xpath=id('options')
+    Input Text    xpath=id('options')    ${time}
+    sleep    30s
+    Click Element    xpath=id('cateText')
+    sleep    5s
+    Click Element    xpath=id('categoryOptions')/li[5]/a
+    sleep    20s
+    Click Element    xpath=id('submitAddContent')
+    Connect To Database    MySQLdb    engageautomation1    root    facetime    192.168.119.71    3306
+    sleep    10s
+    Log To Console    ${time}
+    ${TextID}=    Query    select textID from MessageTextOptions where text='${time}' and csUserID='31'
+    Log To Console    ${TextID[0][0]}
+    ${MsgID}=    Query    select msgID from SocnetContentTextAssociation where textID=${TextID[0][0]}
+    Log To Console    ${MsgID[0][0]}
+    ${ContentID}=    Query    select contentID from SocnetContent where msgID=${MsgID[0][0]} and categoryID=1656
+    Log To Console    ${ContentID[0][0]}
+    Disconnect From Database
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+select textID from MessageTextOptions where text='asdasd' and csUserID=31 
+select msgID from SocnetContentTextAssociation where textID=14244
+select contentID from SocnetContent where msgID='13114' and categoryID=1656
+select * from EmailContentApproval where contentID=13114
+select * from SocnetContentSharingHistory where contentID=13114 and networkID=24
+
+
+select contentID.SocnetContent from  INNER JOIN SocnetContentTextAssociation ON SocnetContentTextAssociation.textID=MessageTextOptions.textID
+
+
+
+
+
+
+SELECT Orders.OrderID, Customers.CustomerName, Shippers.ShipperName
+FROM ((Orders
+INNER JOIN Customers ON Orders.CustomerID = Customers.CustomerID)
+INNER JOIN Shippers ON Orders.ShipperID = Shippers.ShipperID);
+
+
+
+sleep	10s	
+${TextID}=	Query	select textID from MessageTextOptions where text='asdasd' and csUserID='31'
+Log To Console	${TextID[0][0]}	
+${MsgID}=	Query	select msgID from SocnetContentTextAssociation where textID=${TextID[0][0]}
+Log To Console	${MsgID[0][0]}	
+${ContentID}=	Query	select * from SocnetContent where msgID=${MsgID[0][0]} and categoryID=1656
+Log To Console	${ContentID[0][0]}	
+${ApprovedFromMailscheduleStatus }=	Query	select isApproved,scheduleStatus from EmailContentApproval where contentID=${ContentID[0][0]}
+
+
+
+select contentID from SocnetContent sc 
+inner join SocnetContentTextAssociation scta on sc.msgID=scta.msgID
+inner join MessageTextOptions mto on scta.textID=mto.textID
+where mto.text='asdasd' and mto.csUserID=31
